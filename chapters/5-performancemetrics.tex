@@ -1,0 +1,104 @@
+\chapter{CPI Stacks for Vortex}
+
+\Acrfull{cpi} stacks are a breakdown of the execution cycles into a set of classes. The breakdown aids in identifying potential bottlenecks in the architecture. In my project thesis \cite{Aurud_Project}, I implemented a \acrfull{rtl} solution to create \acrshort{cpi} stacks for \Gls{vortex} (CSV). My solution utilized a classification scheme based on \acrshort{gsi} \cite{GSI_GPU_Stall_Inspector} described below. Further, Section \ref{sec:csv} will briefly describe how my implementation of \acrshort{csv} in my project thesis differs from \acrshort{gsi}, and Section \ref{sec:improve_csv} will describe how I improved \acrshort{csv} for this thesis.
+
+\section{GPU Stall Inspector} \label{sec:gsi}
+
+The \acrfull{gsi}\cite{GSI_GPU_Stall_Inspector} is a stall attribution tool that enables detailed classification of memory stalls. They also present a set of classes for instruction stalls, also used by GCoM\cite{gcom}. \acrshort{gsi}'s classification is done in two separate steps. First, if no warps are issued, a stall type is attributed to each warp instruction in the issue stage. The attribution is done based on the cause most strongly preventing execution. The strength of the stall is linked to the likelihood that the stall will remain in the next cycle. The details regarding the priority can be found in their paper \cite{GSI_GPU_Stall_Inspector}. Once each warp is classified, the issue cycle is classified based on the inverse priority \footnote{The priority is not exactly inversed, as memory and synchronization stalls are prioritized over compute stalls in
+both steps} of the stalled warps, i.e the cause of the warp least likely to stall in the next cycle. \\
+
+\noindent
+The following is a list describing the classes used by \acrshort{gsi}:
+
+\noindent
+\textbf{Base}: If an instruction is scheduled, the cycle counts towards base.
+
+\noindent
+\textbf{Idle}: The warp is not active, indicating that the kernel is not fully utilizing the GPU, because of poor load balancing or because there is not enough work.
+
+\noindent
+\textbf{Control stall}: The warp instruction supplied by the instruction buffer is not the next instruction to be executed by the warp. This might be due to a high degree of divergence in the kernel.
+
+\noindent
+\textbf{Synchronization stall}: The warp is blocked due to a barrier, to synchronize with other warps.
+
+\noindent
+\textbf{Memory data stall}: The warp cannot issue because the operands are dependent on the result of a pending load.
+
+\noindent
+\textbf{Memory structural stall}: The warp is a memory instruction requiring the \acrshort{lsu}, but it cannot be issued because the \acrshort{lsu} is not ready.
+
+\noindent
+\textbf{Compute data stall}: The warp cannot issue because the operands are dependent on the result of a pending compute instruction. Compute instruction refers to every non-memory instruction. 
+
+\noindent
+\textbf{Compute structural stall}: The warp is a compute instruction, but the required functional unit is not ready.
+
+%\textcolor{red}{\acrshort{gsi} has some issues: Does not give a full view of the issue stage (are multiple warps stalled? What are the cause of this, how many warps can be cannot be scheduled etc.)}
+
+\section{CSV} \label{sec:csv}
+
+For my project thesis\cite{Aurud_Project}, I adapted the classification scheme of \acrshort{gsi} to create \acrshort{csv}. As the baseline version of \Gls{vortex} only selects one warp to attempt to issue, the two step scheme of \acrshort{gsi} was not required. Instead, \acrshort{csv} only sampled the stall cause of the warp selected by \Gls{vortex}' issue scheduler. Every cycle, each \acrshort{sm} attributes its cycle to the class corresponding with the stall cause. Later, the data from each \acrshort{sm} is read and accumulated to create the results for the entire \acrshort{gpu}.
+
+When a data stall occurs, the functional unit or combination of functional units which reserved the operand register(s) are used to track the type of data stall. If \textcolor{red}{See how this was described in project and finish explaining tracking of data dependencies} 
+
+To simplify the implementation, I grouped control and synchronization stalls into one class: \textit{sync \& control stalls}. There were also close to no barriers in the original benchmarks. \textit{Sync \& control stalls} occurs if there are no warps in the instruction buffer, and there were no ready warps in the fetch's warp scheduler. Additionally I included a class for \textit{empty ibuffer} which occured if there were no warps in the instruction buffer but there were ready warps in the warp scheduler. This can occur if there is significant latency between fetching an instruction and it being available in the instruction scheduler.
+
+An issue with implementing idle was that the \acrshortpl{sm} terminated at different times, and thus dumped their performance data at different times. (This is before the implementations described in Section \ref{sec:reading_perf}). The idle cycles could thus  not be read by the \acrshortpl{sm} themselves. To solve this, the number of idle cycles could be calculated as
+
+\begin{equation} \label{eq:idle}
+    C^i_{idle} = \textrm{max}(C^i_{active}) - C^i_{active}
+\end{equation}
+\noindent
+where $\textrm{max}(C_{active})$ represents the number of cycles used to run the program, and $C^i_{active}$ represents the number of active cycles for the $i$th \acrshort{sm}.
+
+\noindent
+While the data and structural causes described by \acrshort{gsi} can occur individually, an instruction can also be stalled by both at the same time. To investigate if this was the case, the \textit{data \& structural stall} class was included. Thus if both occurred, it would be classified to a separate class rather than having to prioritize one class over another.
+
+%The baseline version of Vortex only attempts to issue one warp each cycle. Because of this, I did not have to consider the warps not selected by the issue-scheduler. Since we are going to change the issue-scheduler, such that it only can select ready warps, it requires us to update the way 
+
+%\textcolor{red}{List of new set of classes}
+
+%\textcolor{red}{Scheme for attributing cycles in a more time proportional way}
+
+%\textcolor{red}{Additional calculations for idle cycles are required to add idle cycles when cores finish at different times}
+
+\section{Improving CSV} \label{sec:improve_csv}
+
+\noindent
+As I see it, GSI and the version of \acrshort{csv} implemented in my project thesis has a key weakness. It does not describe the entire state of the issue stage. E.g if multiple warps are available and all are memory structural stalls, except one compute structural stalled warp, the cycle will be classified as compute structural stall. This may mislead us into thinking that the throughput of the compute functional units are the bottleneck. Resolving the 'issue' would just reveal the cause of all the other warps. Another example would be a case where the GPU frontend does not fetch enough instructions. This would result in mostly data stalls due to having a small selection of warps to issue, while the real problem might be control or synchronization stalls. As the classification is not proportional to the number of each cause, the solutions will not lead to a proportional speedup. It will also be hard to say if the proposed solutions just revealed existing stalls or actually caused new behaviour. I am also implementing ready scheduling, described Section \ref{sec:ready_scheduling}, thus \acrshort{csv} cannot sample only the warp selected by the issue scheduler.
+
+\begin{figure}
+     \centering
+     \begin{subfigure}[t]{0.45\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/proportional-stall-ex1.png}
+         \caption{The add instruction is waiting for the result of a load. The load is waiting for the LSU to be ready while the two remaining buffers are empty}
+         \label{fig:prop_stall_1}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[t]{0.45\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/proportional-stall-ex2.png}
+         \caption{The add instruction is waiting for the result of a load and a computation. The load is waiting for the LSU to be ready while the two remaining buffers are empty}
+         \label{fig:prop_stall_2}
+     \end{subfigure}
+        \caption{Examples of proportional stall classification with 4 warps in an \acrshort{sm}.}
+        \label{fig:lrr-gto}
+\end{figure}
+
+\noindent
+To resolve this weakness I took inspiration from TIP\cite{TIP} to make \acrshort{csv} time proportional. When a stall occurs, all \acrshortpl{tb} in the \acrshort{sm} attributes the cause(s) of the stall. Then $1/N$ cycles are attributed to the corresponding stall class of each \acrshort{tb}, where $N$ represents the number of warps per \acrshort{sm}. Figure \ref{fig:prop_stall_1} shows an example of how the cycles may be attributed. If a warp has multiple causes for stalling, i.e a combination of data stalls and/or a structural stall, the $1/N$th cycle is further divided evenly among the stalls, as illustrated in Figure \ref{fig:prop_stall_2}. By attributing the cycles in proportion to the occurrence of the stalls, we get a better overview of the entire issue stage and why no warp is issued.
+
+With my new attribution scheme, I have to include an additional stall class: \textit{missed schedule}. This is required as the existing instruction scheduler might stall due to selecting a stalling warp, while a ready warp is available. In this case, the entire cycle is attributed as \textit{missed schedule}. Figure \ref{fig:cpi_flowchart} shows a flowchart for how a stall cause is attributed.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/flowchart_grouped.png}
+    \caption[Flowchart for cycle \acrshort{csv}'s cycle attribution.]{Flowchart for cycle attribution. Data and structural stalls are divided if they occur together. Data stalls may also be further divided if it is waiting for the result of both memory and compute. TODO: missed schedule is for each warp}
+    \label{fig:cpi_flowchart}
+\end{figure}
+
+\section{Measuring Memory Bandwidth}
+
+\textcolor{red}{Memory bandwidth is measured at L1, L2 and L3 caches counting the number of outgoing requests. Requests from L3 are requests to DRAM}

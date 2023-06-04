@@ -1,0 +1,47 @@
+% The following list briefly describes the main observations of the results, before giving a more detailed evaluation in the following sections.
+% \begin{enumerate}
+%     \item Representing about half of the stalls, \textit{Sync \& control} stalls dominate in the baseline version of \Gls{vortex}. Removing unnecessary frontend stalls, allow the final version to heavily reduce the occurrence of \textit{sync \& control} stalls.
+%     \item Compute bound benchmarks see great reductions in \acrshort{cpi} when increasing the throughput of the frontend and implementing ready scheduling, eliminating missed schedules.
+%     \item The reduction in \textit{sync \& control} stalls is in most cases revealing more memory stalls.
+%     \item Some benchmarks see a significant increase in idle cycles after implementing the changes.
+%     \item For some benchmarks \textit{sync \& control} stalls are replaced by \textit{empty ibuffer} stalls.
+%     \item For most benchmarks the scheduling algorithm has little to no effect on the performance.
+
+% \end{enumerate}
+
+% However most of the remaining stalls are data dependency stalls and missed schedules. The data stalls are mostly \textit{compute data} stalls, which are low latency, meaning the instructions will be ready in few cycles. By scheduling the ready instructions, and removing missed schedules, the low latency data stalls can be hidden until their operands become available.
+
+% Increasing the throughput of the frontend makes more instructions available in the instruction buffer. This will also increase the number of available warps for the instruction scheduler. This together with a ready scheduler, allows \Gls{vortex} to issue additional instructions as long as they are ready. In the case of \textit{psort}, the number of stalls is halved, resulting in a decrease in \acrshort{cpi} by $20\%$. The number of frontend stalls is low for \textit{psort}. Thus it is seeing limited improvements from the frontend changes. However most of the remaining stalls are data dependency stalls and missed schedules. The data stalls are mostly \textit{compute data} stalls, which are low latency, meaning the instructions will be ready in few cycles. By scheduling the ready instructions, and removing missed schedules, the low latency data stalls can be hidden until their operands become available.
+
+
+% For \textit{lavaMD} (Figure \ref{fig:instr_dist_lavaMD}), the distribution is skewed. In the baseline version, the highest throughput \acrshort{sm} executed $5.5\times$ more instructions than the \acrshort{sm} with lowest throughput. The distribution gets even worse when implementing the changes, making some of the \acrshortpl{sm} execute close to $0\%$ of the instructions. As LavaMD has close to none \textit{idle} stalls, the discrepancy is clearly not due to inactive \acrshortpl{sm}. Rather it is probable that the \acrshort{noc} is unable to distribute the bandwidth evenly among the \acrshortpl{sm}, resulting in different memory stalls for different \acrshortpl{sm}. The instruction distribution of \textit{backprop} is however even, thus the \acrshort{noc} cannot be at fault for \textit{backprop's} increase in \textit{memory structural} stalls. Unlike lavaMD, backprop use a lot of memory barriers. When a barrier is issued to the \acrshort{lsu}, all in-flight memory instructions have to complete before the \acrshort{lsu} become ready. For the benchmarks with \textit{memory structural} stalls and low bandwidth requirement, barriers are likely to be the cause.  
+% This may indicate that the \acrshort{noc} is treating \acrshortpl{sm} unfairly, giving some of the \acrshortpl{sm} significantly less bandwidth than others. The throttled \acrshortpl{sm} would in that case stall due to \textit{memory structural stalls}, while the other \acrshortpl{sm} would be more dominated by \textit{memory data} stalls.
+
+% \textcolor{red}{We observed a set of potential issues with Vortex. The issue scheduler does not have enough information to schedule ready warps. The front-end is unable to provide enough instructions to the issue stage, resulting in less scheduling opportunities.}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.5\textwidth]{example-image-b}
+%     \caption{CPI stacks for only baseline}
+%     \label{fig:cpi_baseline}
+% \end{figure}
+
+
+% \textcolor{red}{Additionally, we observe that the front-end is unable to bring enough instructions to the issue stage. see \ref{fig:cpi_baseline}}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics{}
+%     \caption{Caption}
+%     \label{fig:enter-label}
+% \end{figure}
+
+%\textcolor{red}{The baseline issue scheduler checked if the scheduled instruction could be issued after scheduling. This resulted in cycles where warps where not scheduled even tough there ready warps were available}
+
+%\textcolor{red}{This was solved by redesigning the issue stage as shown in \ref{fig:new_issue_stage}}
+
+%\textcolor{red}{For all warps, check if they can issue. Most of the logic is implemented in scoreboard and dispatch. Requires selector in dispatch and scoreboard for each warp to read registers regarding the ready state}
+
+
+% TODO: Comment on the number of bits used to track gto age and handling of overflow
+% TODO: Comment on the size of the ibuffer

@@ -1,0 +1,17 @@
+\chapter{Conclusion and Further Work}
+
+\section{Conclusion}
+
+In this thesis I proposed and implemented improvements for \Gls{vortex}' frontend, increasing the bandwidth of fetch, decode and issue stages. The proposed changes were based upon the work and findings in my project thesis. This accounts for contribution \textbf{C1} corresponding with task \textbf{T1}.
+
+To enable \acrshort{csv} to give a better overview of the issue stage I improved it by making it consider the stall cause of all warps. This gives a better overview of the issue stage and is able to show frontend stalls of individual warps. This improvement comprises contribution \textbf{C2} which corresponds with task \textbf{T2}. 
+
+Through evaluating the implemented changes, I find that the increased frontend throughput and issue bandwidth has varying effects on the performance. Some benchmarks see great performance improvements, while others reveal that \Gls{vortex} struggles to hide latencies. I also find that the current configuration is too small to gain performance from \acrshort{gto} over \acrshort{lrr} scheduling. This constitutes contribution \textbf{C3} corresponding with task \textbf{T3}.
+
+I adapt Rodinia benchmarks to enable them to run on \Gls{vortex}, broadening the analysis by adding a set of benchmarks more representative of real workloads. By additionally enabling \Gls{vortex} to profile multi-kernel programs, it becomes possible to add a wider range of benchmarks. This comprises contribution \textbf{C4} which corresponds with task \textbf{T4}.
+
+\section{Further Work}
+
+Though the improvements I proposed in this thesis improved frontend throughput, it did not improve performance for many of the benchmarks. The reason behind this is most likely that the \acrshortpl{sm} are too small to hide latency. Having more warps per \acrshort{sm} together with a more fitting memory system is likely required to solve this problem. However, it is infeasible to continue using software simulation while increasing the size of the \acrshortpl{sm} and the \acrshort{gpu}. To solve this \acrshort{fpga}-acceleration is required. Thus the natural next step is to integrate \Gls{vortex} into Chipyard and FireSim to resolve the problems regarding the discrepancies between \acrshort{fpga} and \acrshort{asic} clock frequencies.
+
+There are also other issues pertaining to \Gls{vortex} which needs to be resolved to make it a reasonable \acrshort{gpu}. \Gls{vortex} is clearly unable to perform efficient workload balancing. In some cases, the \acrshort{tb} scheduler is unable to distribute work to all of the \acrshortpl{sm}, making them idle. In other cases, \acrshortpl{sm} finish execution long before others. Gaining a better understanding of \Gls{vortex}' \acrshort{tb} scheduler and workload distribution is probably required to understand the source of the problem better. It is likely better to implement a dynamic system, similar to the one made by Nvidia~\cite{CTA_scheduling}.  

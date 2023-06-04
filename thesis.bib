@@ -1,20 +1,514 @@
-@article{claerbout1991scrutiny,
-  title={A Scrutiny of the Introduction},
-  author={Claerbout, Jon F},
-  journal={The Leading Edge},
-  volume={10},
-  number={1},
-  pages={39--41},
-  year={1991},
-  publisher={Society of Exploration Geophysicists}
+@INPROCEEDINGS{GSI_GPU_Stall_Inspector,  
+author={Alsop, Johnathan and Sinclair, Matthew D. and Komuravelli, Rakesh and Adve, Sarita V.},  
+booktitle={Proceedings of the International Symposium on Performance Analysis of Systems and Software (ISPASS)},   
+title={{GSI: A GPU Stall Inspector to characterize the sources of memory stalls for tightly coupled GPUs}},   
+year={2016},  
+% volume={},  
+% number={},  
+pages={172-182}, 
+% doi={10.1109/ISPASS.2016.7482092}
 }
 
-@article{landes1951scrutiny,
-  title={A Scrutiny of the Abstract},
-  author={Landes, Kenneth K},
-  journal={Bulletin of the American Association of Petroleum Geologists},
-  volume={35},
-  number={7},
-  pages={1660},
-  year={1951}
+%https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7446079
+@INPROCEEDINGS{ipaws,
+  author={Lee, Minseok and Kim, Gwangsun and Kim, John and Seo, Woong and Cho, Yeongon and Ryu, Soojung},
+  booktitle={Proceedings of the International Symposium on High Performance Computer Architecture (HPCA)}, 
+  title={{iPAWS: Instruction-issue pattern-based adaptive warp scheduling for GPGPUs}}, 
+  year={2016},
+  % volume={},
+  % number={},
+  pages={370-381},
+  % doi={10.1109/HPCA.2016.7446079}
 }
+
+@article{Aurud_Project,
+author = {Aurud, Lars Murud},
+title = {Performance Analysis of the {Vortex GPGPU}},
+journal = {},
+publisher = {Norwegian University of Science and Technology},
+year = {2022},
+month = {12}
+}
+
+@inproceedings{vortex,
+author = {Tine, Blaise and Yalamarthy, Krishna Praveen and Elsabbagh, Fares and Hyesoon, Kim},
+title = {{Vortex: Extending the RISC-V ISA for GPGPU and 3D-Graphics}},
+year = {2021},
+% isbn = {9781450385572},
+% publisher = {Association for Computing Machinery},
+% address = {New York, NY, USA},
+% url = {https://doi.org/10.1145/3466752.3480128},
+% doi = {10.1145/3466752.3480128},
+booktitle = {Proceedings of the  International Symposium on Microarchitecture (MICRO)},
+pages = {754–766},
+% numpages = {13},
+% keywords = {computer graphics, reconfigurable computing, memory systems.},
+% location = {Virtual Event, Greece},
+% series = {MICRO '21}
+}
+
+@article{riscv-isa,
+  title={{The RISC-V instruction set manual}},
+  author={Waterman, Andrew and Lee, Yunsup and Patterson, David and Asanovic, Krste and level Isa, Volume I User and Waterman, Andrew and Lee, Yunsup and Patterson, David},
+  journal={Volume I: User-Level ISA’, version},
+  volume={2},
+  year={2014}
+}
+
+@inproceedings{elastic_pipeline,
+author = {Cortadella, Jordi and Kishinevsky, Mike and Grundmann, Bill},
+title = {{Synthesis of Synchronous Elastic Architectures}},
+year = {2006},
+% isbn = {1595933816},
+% publisher = {Association for Computing Machinery},
+% address = {New York, NY, USA},
+% url = {https://doi.org/10.1145/1146909.1147077},
+% doi = {10.1145/1146909.1147077},
+booktitle = {Proceedings of the Design Automation Conference (DAC)},
+pages = {657–662},
+% numpages = {6},
+% keywords = {protocols, latency-insensitive design, synthesis, latency-tolerance},
+% location = {San Francisco, CA, USA},
+% series = {DAC '06}
+}
+
+%Instruction fetch
+%https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=e8cbdf5f4a6a758f357a944867cb9c783f9cd17e
+
+%A100
+%https://dl.acm.org/doi/pdf/10.1145/3468044.3468053
+
+%BTB sizes (reducing the cost of branches)
+%https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=477244
+
+%SAXPY input size:
+%https://github.com/bennylp/saxpy-benchmark/tree/master/src
+
+%RODINIA characteristics simulated on 28 cores using GPUSIM
+%https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=5650274
+
+%Intra and inter wavefront locality
+%https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fwww.cs.ucr.edu%2F~nael%2F217-f19%2Flectures%2FWarpScheduling.pptx&wdOrigin=BROWSELINK
+
+%Dissecting GPU Memory Hierarchy Through Microbenchmarking
+
+@article{ZHANG2018520,
+title = {{Locality based warp scheduling in GPGPUs}},
+journal = {Future Generation Computer Systems},
+volume = {82},
+pages = {520-527},
+year = {2018},
+% issn = {0167-739X},
+% doi = {https://doi.org/10.1016/j.future.2017.02.036},
+% url = {https://www.sciencedirect.com/science/article/pii/S0167739X17302728},
+author = {Yang Zhang and Zuocheng Xing and Cang Liu and Chuan Tang and Qinglin Wang},
+% keywords = {GPGPU, Warp scheduling, Locality, Reordering}
+}
+
+@inproceedings{gcom,
+author = {Lee, Jounghoo and Ha, Yeonan and Lee, Suhyun and Woo, Jinyoung and Lee, Jinho and Jang, Hanhwi and Kim, Youngsok},
+title = {{GCoM: A Detailed GPU Core Model for Accurate Analytical Modeling of Modern GPUs}},
+year = {2022},
+% isbn = {9781450386104},
+% publisher = {Association for Computing Machinery},
+% address = {New York, NY, USA},
+% url = {https://doi.org/10.1145/3470496.3527384},
+% doi = {10.1145/3470496.3527384},
+booktitle = {Proceedings of the International Symposium on Computer Architecture (ISCA)},
+pages = {424–436},
+% numpages = {13},
+% keywords = {performance modeling, interval analysis, graphics processing units},
+% location = {New York, New York},
+% series = {ISCA '22}
+}
+
+@online{verilator,
+    author= {Wilson Snyder},
+    title = {Verilator},
+    url = {https://www.veripool.org/verilator/},
+    year = {2022}
+}
+
+@phdthesis{wang2020modeling,
+  title={{Modeling and Minimizing Memory Contention in General-Purpose GPUs}},
+  author={Wang, Lu},
+  year={2020},
+  school={Ghent University}
+}
+
+@article{Rekdal_Master,
+author = {Rekdal, Markus},
+title = {{Investigating the Performance Scalability of the Vortex GPU}},
+journal = {NTNU Open},
+% publisher = {Norwegian University of Science and Technology},
+year = {2022},
+% month = {6}
+}
+
+@article{Ramulator,
+author = {Kim, Yoongu and Yang, Weikun and Mutlu, Onur},
+title = {{Ramulator: A Fast and Extensible {DRAM} Simulator}},
+year = {2016},
+% issue_date = {January 2016},
+% publisher = {IEEE Computer Society},
+% address = {USA},
+volume = {15},
+% number = {1},
+% issn = {1556-6056},
+% url = {https://doi.org/10.1109/LCA.2015.2414456},
+% doi = {10.1109/LCA.2015.2414456},
+journal = {IEEE Computer Architecture Letters},
+% month = {1},
+pages = {45–49},
+% numpages = {5}
+}
+
+@INPROCEEDINGS{rodinia,
+  author={Che, Shuai and Boyer, Michael and Meng, Jiayuan and Tarjan, David and Sheaffer, Jeremy W. and Lee, Sang-Ha and Skadron, Kevin},
+  booktitle={Proceedings of the International Symposium on Workload Characterization (IISWC)}, 
+  title={{Rodinia: A benchmark suite for heterogeneous computing}}, 
+  year={2009},
+  % volume={},
+  % number={},
+  pages={44-54},
+  % doi={10.1109/IISWC.2009.5306797}
+}
+
+@INPROCEEDINGS{rodinia_characterization,
+  author={Che, Shuai and Sheaffer, Jeremy W. and Boyer, Michael and Szafaryn, Lukasz G. and Liang Wang and Skadron, Kevin},
+  booktitle={Proceedings of the International Symposium on Workload Characterization (IISWC)}, 
+  title={{A characterization of the Rodinia benchmark suite with comparison to contemporary CMP workloads}}, 
+  year={2010},
+  % volume={},
+  % number={},
+  pages={1-11},
+  % doi={10.1109/IISWC.2010.5650274}
+}
+
+@misc{Idun_tech_report,
+  title = {{EPIC: An Energy-Efficient, High-Performance GPGPU Computing Research Infrastructure}},
+  author = {Magnus Sj\"alander and Magnus Jahre and Gunnar Tufte and Nico Reissmann},
+  year = 2019,
+  % eprint = {1912.05848},
+  archivePrefix ={arXiv},
+  % primaryClass = {cs.DC}
+}
+
+@INPROCEEDINGS{simpoint,
+  author={Perelman, E. and Hamerly, G. and Calder, B.},
+  booktitle={Proceedings of the International Conference on Parallel Architectures and Compilation Techniques (PACT)}, 
+  title={{Picking statistically valid and early simulation points}}, 
+  year={2003},
+  % volume={},
+  % number={},
+  pages={244-255},
+  % doi={10.1109/PACT.2003.1238020}
+}
+
+@inproceedings{skybox,
+author = {Tine, Blaise and Saxena, Varun and Srivatsan, Santosh and Simpson, Joshua R. and Alzammar, Fadi and Cooper, Liam and Kim, Hyesoon},
+title = {{Skybox: Open-Source Graphic Rendering on Programmable RISC-V GPUs}},
+year = {2023},
+% isbn = {9781450399180},
+% publisher = {Association for Computing Machinery},
+% address = {New York, NY, USA},
+% url = {https://doi.org/10.1145/3582016.3582024},
+% doi = {10.1145/3582016.3582024},
+booktitle = {Proceedings of the International Conference on Architectural Support for Programming Languages and Operating Systems (ASPLOS)},
+pages = {616–630},
+volume = {3},
+% numpages = {15},
+% keywords = {graphics, hardware accelerator, microarchitecture},
+% location = {Vancouver, BC, Canada},
+% series = {ASPLOS 2023}
+}
+
+@INPROCEEDINGS{cactus,
+  author={Naderan-Tahan, Mahmood and Eeckhout, Lieven},
+  booktitle={Proceedings of the International Symposium on
+Workload Characterization (IISWC)}, 
+  title={{Cactus: Top-Down GPU-Compute Benchmarking using Real-Life Applications}}, 
+  year={2021},
+  % volume={},
+  % number={},
+  pages={176-188},
+  % doi={10.1109/IISWC53511.2021.00026}
+}
+
+@inproceedings{get_out_of_the_valley,
+author = {Liu, Yuxi and Zhao, Xia and Jahre, Magnus and Wang, Zhenlin and Wang, Xiaolin and Luo, Yingwei and Eeckhout, Lieven},
+title = {{Get out of the Valley: Power-Efficient Address Mapping for GPUs}},
+year = {2018},
+% isbn = {9781538659847},
+% publisher = {IEEE Press},
+% url = {https://doi.org/10.1109/ISCA.2018.00024},
+% doi = {10.1109/ISCA.2018.00024},
+booktitle = {Proceedings of the International Symposium on Computer Architecture (ISCA)},
+pages = {166–179},
+% numpages = {14},
+% location = {Los Angeles, California},
+% series = {ISCA '18}
+}
+
+%https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8908051
+@INPROCEEDINGS{improving_gpgpu_scheduling,
+  author={Pandey, Shivam Girish and Gopalakrishnan, Shobha},
+  booktitle={Proceedings of the International Conference on Intelligent Sustainable Systems (ICISS)}, 
+  title={{Improving GPGPU Performance Using Efficient Scheduling}}, 
+  year={2019},
+  % volume={},
+  % number={},
+  pages={570-577},
+  % doi={10.1109/ISS1.2019.8908051}
+}
+
+@INPROCEEDINGS{cache-conscious_wavefront_scheduling,
+  author={Rogers, Timothy G. and O'Connor, Mike and Aamodt, Tor M.},
+  booktitle={Proceedings of the International Symposium on Microarchitecture (MICRO)}, 
+  title={{Cache-Conscious Wavefront Scheduling}}, 
+  year={2012},
+  % volume={},
+  % number={},
+  pages={72-83},
+  % doi={10.1109/MICRO.2012.16}
+}
+
+@inproceedings{caws,
+author = {Lee, Shin-Ying and Wu, Carole-Jean},
+title = {{CAWS: Criticality-Aware Warp Scheduling for GPGPU Workloads}},
+year = {2014},
+% isbn = {9781450328098},
+% publisher = {Association for Computing Machinery},
+% address = {New York, NY, USA},
+% url = {https://doi.org/10.1145/2628071.2628107},
+% doi = {10.1145/2628071.2628107},
+booktitle = {Proceedings of the International Conference on Parallel Architectures and Compilation (PACT)},
+pages = {175–186},
+% numpages = {12},
+% keywords = {warp/wavefront scheduling, gpgpu, gpu performance characterization},
+% location = {Edmonton, AB, Canada},
+% series = {PACT '14}
+}
+
+@inproceedings{TIP,
+author = {Gottschall, Bj\"{o}rn and Eeckhout, Lieven and Jahre, Magnus},
+title = {{TIP: Time-Proportional Instruction Profiling}},
+year = {2021},
+% isbn = {9781450385572},
+% publisher = {Association for Computing Machinery},
+% address = {New York, NY, USA},
+% url = {https://doi.org/10.1145/3466752.3480058},
+% doi = {10.1145/3466752.3480058},
+booktitle = {Proceedings of the International Symposium on Microarchitecture (MICRO)},
+pages = {15–27},
+% numpages = {13},
+% location = {Virtual Event, Greece},
+% series = {MICRO '21}
+}
+
+@inproceedings{gpu_sim_cuda,
+  author={Bakhoda, Ali and Yuan, George L. and Fung, Wilson W. L. and Wong, Henry and Aamodt, Tor M.},
+  booktitle={Proceedings of the International Symposium on Performance Analysis of Systems and Software (ISPASS)}, 
+  title={{Analyzing CUDA workloads using a detailed GPU simulator}}, 
+  year={2009},
+  % volume={},
+  % number={},
+  pages={163-174},
+  % doi={10.1109/ISPASS.2009.4919648}
+}
+
+@ARTICLE{gem5_gpu,
+  author={Power, Jason and Hestness, Joel and Orr, Marc S. and Hill, Mark D. and Wood, David A.},
+  journal={IEEE Computer Architecture Letters}, 
+  title={gem5-gpu: A Heterogeneous CPU-GPU Simulator}, 
+  year={2015},
+  volume={14},
+  % number={1},
+  pages={34-36},
+  % doi={10.1109/LCA.2014.2299539}
+}
+
+@inproceedings{multi2sim,
+  author={Ubal, Rafael and Jang, Byunghyun and Mistry, Perhaad and Schaa, Dana and Kaeli, David},
+  booktitle={Proceedings of the International Conference on Parallel Architectures and Compilation Techniques (PACT)}, 
+  title={{Multi2Sim: A simulation framework for CPU-GPU computing}}, 
+  year={2012},
+  % volume={},
+  % number={},
+  pages={335-344},
+  % doi={}
+}
+
+@inproceedings{lost_in_abstraction,
+  author={Gutierrez, Anthony and Beckmann, Bradford M. and Dutu, Alexandru and Gross, Joseph and LeBeane, Michael and Kalamatianos, John and Kayiran, Onur and Poremba, Matthew and Potter, Brandon and Puthoor, Sooraj and Sinclair, Matthew D. and Wyse, Mark and Yin, Jieming and Zhang, Xianwei and Jain, Akshay and Rogers, Timothy},
+  booktitle={Proceedings of the International Symposium on High Performance Computer Architecture (HPCA)}, 
+  title={{Lost in Abstraction: Pitfalls of Analyzing GPUs at the Intermediate Language Level}}, 
+  year={2018},
+  % volume={},
+  % number={},
+  pages={608-619},
+  % doi={10.1109/HPCA.2018.00058}
+}
+
+@inproceedings{Nyami,
+  author={Bush, Jeff and Dexter, Philip and Miller, Timothy N. and Carpenter, Aaron},
+  booktitle={International Symposium on Performance Analysis of Systems and Software (ISPASS)}, 
+  title={{Nyami: a synthesizable GPU architectural model for general-purpose and graphics-specific workloads}}, 
+  year={2015},
+  % volume={},
+  % number={},
+  pages={173-182},
+  % doi={10.1109/ISPASS.2015.7095803}
+}
+
+@article{MIAOW,
+author = {Balasubramanian, Raghuraman and Gangadhar, Vinay and Guo, Ziliang and Ho, Chen-Han and Joseph, Cherin and Menon, Jaikrishnan and Drumond, Mario Paulo and Paul, Robin and Prasad, Sharath and Valathol, Pradip and Sankaralingam, Karthikeyan},
+title = {{Enabling GPGPU Low-Level Hardware Explorations with MIAOW: An Open-Source RTL Implementation of a GPGPU}},
+year = {2015},
+% issue_date = {July 2015},
+% publisher = {Association for Computing Machinery},
+% address = {New York, NY, USA},
+volume = {12},
+% number = {2},
+% issn = {1544-3566},
+% url = {https://doi.org/10.1145/2764908},
+% doi = {10.1145/2764908},
+journal = {ACM Transactions on Architecture and Code Optimization (TACO)},
+month = {6},
+articleno = {21},
+numpages = {25},
+keywords = {manycore, SIMD, GPU}
+}
+
+@INPROCEEDINGS{FlexGrip,
+  author={Andryc, Kevin and Merchant, Murtaza and Tessier, Russell},
+  booktitle={Proceedings of the International Conference on Field-Programmable Technology (FPT)}, 
+  title={{FlexGrip: A soft GPGPU for FPGAs}}, 
+  year={2013},
+  % volume={},
+  % number={},
+  pages={230-237},
+  % doi={10.1109/FPT.2013.6718358}
+}
+
+@INPROCEEDINGS{graphite,
+  author={Miller, Jason E. and Kasture, Harshad and Kurian, George and Gruenwald, Charles and Beckmann, Nathan and Celio, Christopher and Eastep, Jonathan and Agarwal, Anant},
+  booktitle={Proceedings of the International Symposium on High Performance Computer Architecture (HPCA)}, 
+  title={{Graphite: A distributed parallel simulator for multicores}}, 
+  year={2010},
+  % volume={},
+  % number={},
+  pages={1-12},
+  % doi={10.1109/HPCA.2010.5416635}
+}
+
+@ARTICLE{wwt2,
+  author={Mukherjee, S.S. and Reinhardt, S.K. and Falsafi, B. and Litzkow, M. and Hill, M.D. and Wood, D.A. and Huss-Lederman, S. and Larus, J.R.},
+  journal={IEEE Concurrency}, 
+  title={{Wisconsin Wind Tunnel II: a fast, portable parallel architecture simulator}}, 
+  year={2000},
+  volume={8},
+  % number={4},
+  pages={12-20},
+  % doi={10.1109/4434.895100}
+}
+
+@INPROCEEDINGS{RAMP-gold,
+  author={Tan, Zhangxi and Waterman, Andrew and Avizienis, Rimas and Lee, Yunsup and Cook, Henry and Patterson, David and Asanovic´, Krste},
+  booktitle={Proceedings of the Design Automation Conference (DAC)}, 
+  title={{RAMP gold: An FPGA-based architecture simulator for multiprocessors}}, 
+  year={2010},
+  % volume={},
+  % number={},
+  pages={463-468},
+  % doi={}
+}
+
+@article{gems,
+author = {Martin, Milo M. K. and Sorin, Daniel J. and Beckmann, Bradford M. and Marty, Michael R. and Xu, Min and Alameldeen, Alaa R. and Moore, Kevin E. and Hill, Mark D. and Wood, David A.},
+title = {{Multifacet's General Execution-Driven Multiprocessor Simulator (GEMS) Toolset}},
+year = {2005},
+% issue_date = {November 2005},
+% publisher = {Association for Computing Machinery},
+% address = {New York, NY, USA},
+volume = {33},
+% number = {4},
+% issn = {0163-5964},
+% url = {https://doi.org/10.1145/1105734.1105747},
+% doi = {10.1145/1105734.1105747},
+journal = {ACM SIGARCH Computer Architecture News},
+% month = {11},
+pages = {92–99},
+% numpages = {8}
+}
+
+@ARTICLE{chipyard,
+  author={Amid, Alon and Biancolin, David and Gonzalez, Abraham and Grubb, Daniel and Karandikar, Sagar and Liew, Harrison and Magyar, Albert and Mao, Howard and Ou, Albert and Pemberton, Nathan and Rigge, Paul and Schmidt, Colin and Wright, John and Zhao, Jerry and Shao, Yakun Sophia and Asanović, Krste and Nikolić, Borivoje},
+  journal={IEEE Micro}, 
+  title={{Chipyard: Integrated Design, Simulation, and Implementation Framework for Custom SoCs}}, 
+  year={2020},
+  volume={40},
+  % number={4},
+  pages={10-21},
+  % doi={10.1109/MM.2020.2996616}
+}
+
+@INPROCEEDINGS{firesim,
+  author={Karandikar, Sagar and Mao, Howard and Kim, Donggyu and Biancolin, David and Amid, Alon and Lee, Dayeol and Pemberton, Nathan and Amaro, Emmanuel and Schmidt, Colin and Chopra, Aditya and Huang, Qijing and Kovacs, Kyle and Nikolic, Borivoje and Katz, Randy and Bachrach, Jonathan and Asanovic, Krste},
+  booktitle={Proceedings of the International Symposium on Computer Architecture (ISCA)}, 
+  title={{FireSim: FPGA-Accelerated Cycle-Exact Scale-Out System Simulation in the Public Cloud}}, 
+  year={2018},
+  % volume={},
+  % number={},
+  pages={29-42},
+  % doi={10.1109/ISCA.2018.00014}
+}
+
+@article{CTA_scheduling,
+author = {Ukarande, Aditya and Patidar, Suryakant and Rangan, Ram},
+title = {{Locality-Aware CTA Scheduling for Gaming Applications}},
+year = {2021},
+% issue_date = {March 2022},
+% publisher = {Association for Computing Machinery},
+% address = {New York, NY, USA},
+volume = {19},
+% number = {1},
+% issn = {1544-3566},
+% url = {https://doi.org/10.1145/3477497},
+% doi = {10.1145/3477497},
+journal = {ACM Transactions on Architecture and Code Optimization (TACO)},
+% month = {12},
+% articleno = {1},
+numpages = {26},
+% keywords = {GPUs, CTA scheduling, shader programs, Cache locality}
+}
+
+@article{pocl,
+author = {J\"{a}\"{a}skel\"{a}inen, Pekka and Lama, Carlos S\'{a}nchez and Schnetter, Erik and Raiskila, Kalle and Takala, Jarmo and Berg, Heikki},
+title = {{pocl: A Performance-Portable OpenCL Implementation}},
+year = {2015},
+% issue_date = {October   2015},
+% publisher = {Kluwer Academic Publishers},
+% address = {USA},
+volume = {43},
+% number = {5},
+% issn = {0885-7458},
+% url = {https://doi.org/10.1007/s10766-014-0320-y},
+% doi = {10.1007/s10766-014-0320-y},
+journal = {Int. J. Parallel Program.},
+% month = {10},
+pages = {752–785},
+% numpages = {34},
+% keywords = {VLIW, Heterogeneous platforms, SIMD, GPGPU, OpenCL, LLVM, Performance portability, Parallel programming}
+}
+
+%IPDOM based reconvergence
+%https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=4408272
+
+%Distribution of runtime in Rodinia:
+%https://www.bu.edu/peaclab/files/2014/03/TZhang_HPEC2014_UMA_camready.pdf
+
+Vortex Work allocation
+%https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fraw.githubusercontent.com%2Fvortexgpgpu%2Fvortex_tutorials%2Fmain%2FSlides_MICRO55%2F4.vortex_software_stack.pptx&wdOrigin=BROWSELINK
+
+% CUDA bandwidth https://dl.acm.org/doi/abs/10.1145/2063384.2063400

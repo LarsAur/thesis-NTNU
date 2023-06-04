@@ -8,7 +8,7 @@
 
 %% IDENTIFICATION
 
-\xdef\ntnuthesisdate{2019/07/18}
+\xdef\ntnuthesisdate{2023/06/12}
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{ntnuthesis}
  [\ntnuthesisdate\space
@@ -140,7 +140,12 @@
 \LoadClass[a4paper,11pt,openright,\paging]{report}
 
 %% PACKAGE LOADING
-
+\usepackage{hhline}
+\usepackage{mathtools}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\usepackage{amsmath}
+\RequirePackage{makecell} % for multiline table cells
 \RequirePackage[utf8]{inputenc}             % for special characters in input
 \RequirePackage[T1]{fontenc}                % modern font encoding
 \RequirePackage[charter, cal=cmcal]{mathdesign} % main font with math support

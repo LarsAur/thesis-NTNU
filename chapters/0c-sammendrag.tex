@@ -1,0 +1,21 @@
+\chapter*{Sammendrag}
+
+Softwaresimulering er en mye brukt metode for å forske på datamaskin arkitekturer. Dessverre er det tregt, spesielt for fler-kjernearkitekturer som GPUer. \acrshort{fpga}-akselerasjon fungerer som en middelvei mellom softwaresimulering og maskinvareprototyper, ved å kombinere raske simuleringer med muligheten til å gjøre endringer raskt. Vortex er en RISC-V-basert GPGPU som kan FPGA-akselereres, og kan dermed være en god kandidat for forskning innen \acrshort{gpu} arkitekturer. Tidligere undersøkelser har funnet potensielle flaskehalser i \Gls{vortex}’ frontend og skedulerere. Dette hindret \Gls{vortex} i å utnytte \acrshort{simd} og \acrshort{mlp}, noe som reduserte gjennomstrømningen og gjorde den latensbundet.
+
+I denne oppgaven implementerer jeg \textit{no-stall-scheduling} og \textit{stall-prediksjon} som gjør det mulig for \Gls{vortex} å skedulere påfølgende warps uten å blokkere dem i frontenden. I tillegg forbedres icache-stadiet ved å øke gjennomstrømmingen av instruksjoner fra instruksjons-cachen. Jeg forbedrer også
+\Gls{vortex}’ skeduler, slik at den kan identifisere warps som er klare, dette fjerner unødvendige ventesykler. Jeg undersøker også virkningen av å bytte fra en \textit{loose-round-robin} (LRR) til en \textit{greedy-then-oldest} (GTO) algoritme for skedulering.
+
+For å forbedre innsikten i Vortex’ ytelse, utvider jeg mine tidligere
+implementasjon for å generere \textit{cycle-stacks for Vortex} (CSV), for å gi innblikk i
+hva som får Vortex til å sakke ned. Til slutt utvider jeg Vortex' manglende benchmark-suite
+ved å implementere benchmarks fra Rodinia, et ofte brukt sett med GPU-benchmarks.
+
+Endringene i frontenden reduserer antallet ventesykler forårsaket av \Gls{vortex}'
+mekanismer for å håndtere kontrollflyt. Sammen med de nye skedulererene muliggjør det for
+issue-stadiet å utnytte de funksjonelle enhetene i større grad. Forandringene
+gir en gjennomsnittlig reduksjon i \acrshort{cpi} på –\% over utgangspunktet, hvor \textit{psort, sgemm} og
+\textit{Needleman-Wunsch} ser en reduksjon i \acrshort{cpi} på $20\%$. Noen benchmarks
+opplever en liten økning eller ingen endring i \acrshort{cpi}. Dette skyldes en mangel på minne
+båndbredde og minnenivå parallellitet, som kan løses ved å øke antall warps per
+\acrshort{sm}, og bruk et minnesystem som er mer egnet for GPUer. Jeg observerer få forskjeller i bruk av
+GTO over LRR, noe som sannsynligvis skyldes svakheter i implementasjonen min.
