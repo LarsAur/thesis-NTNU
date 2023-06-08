@@ -18,7 +18,20 @@ In this chapter I will first give an overview of the \Gls{vortex} architecture a
     \label{fig:clustering}
 \end{figure}
 
-The \Gls{vortex} microarchitecture is illustrated in Figure \ref{fig:vortex_microarchitecture}. Each \acrshort{sm} is a 5-stage pipeline containing a \textit{fetch}, \textit{decode}, \textit{issue}, \textit{execute} and \textit{commit} stage. The \acrshortpl{sm} of \Gls{vortex} all have their own L1 and instruction caches. There are also options for \Gls{vortex} to include L2 and L3 caches, which are shared among \acrshortpl{sm}, as shown in Figure \ref{fig:clustering}. If the L2 or L3 caches are not included, they are replaced by memory arbiters. \Gls{vortex}' pipeline is elastic\cite{elastic_pipeline}, i.e. it is using \textit{ready} and \textit{valid} signals to communicate between the modules and pipeline stages. This makes it easier to add new or configure existing components, as the modules can be more flexible in the number of cycles they use.
+The \Gls{vortex} microarchitecture is illustrated in Figure \ref{fig:vortex_microarchitecture}. Each \acrshort{sm} is a 5-stage pipeline containing a \textit{fetch}, \textit{decode}, \textit{issue}, \textit{execute} and \textit{commit} stage. The \acrshortpl{sm} of \Gls{vortex} all have their own L1 and instruction caches. There are also options for \Gls{vortex} to include L2 and L3 caches, which are shared among \acrshortpl{sm}, as shown in Figure \ref{fig:clustering}. If the L2 or L3 caches are not included, they are replaced by memory arbiters. \Gls{vortex}' pipeline is elastic~\cite{elastic_pipeline}, i.e. it is using \textit{ready} and \textit{valid} signals to communicate between the modules and pipeline stages. This makes it easier to add new or configure existing components, as the modules can be more flexible in the number of cycles they use.
+
+\textcolor{red}{The Vortex gpu is mostly undocumented, except what is explained in their paper, thus most of this insight is through reading rtl source code.}
+
+\subsection{Vortex ISA}
+
+Vortex extends the \gls{riscv}~\acrshort{isa}~\cite{riscv-isa} with six new instructions:
+\begin{itemize}
+    \item \textbf{wspawn}: Controlling warps by activating a number of warps at a specified \acrshort{pc}.
+    \item \textbf{tmc}: Controlling threads by activating or deactivating threads within a warp. 
+    \item \textbf{split \& join}: Handling control divergence. \textit{Split} pushes information about the current state of the thread-mask and branching to the \acrfull{ipdom} stack, and \textit{join} pops the information off the stack to reconverge the branches.
+    \item \textbf{bar}: Synchronizing warps, both intra-core and inter-core, using barriers. The barrier is released when the expected number of warps has reached it.  
+    \item \textbf{tex}: Texture lookup with a variety of configurable features, such as mipmapping. 
+\end{itemize}
 
 \subsection{Pipeline} \label{sec:vortex_pipeline}
 Following is a description of the five pipeline stages of \Gls{vortex}' \acrshortpl{sm}.
@@ -60,10 +73,10 @@ The instruction scheduler used in the baseline version of \Gls{vortex} is a roun
 
 \Gls{vortex}' workload distribution and \acrshort{tb} scheduling is performed statically. Upon starting the execution of a kernel, each \acrshort{sm} calculates the total number of active \acrshortpl{sm} required. The number of \acrshortpl{sm} required is calculated as:
 \begin{equation}
-    \#SMs_{active} = \text{min}(\frac{\#WorkGroups}{\#WarpsPerSM \times \#ThreadsPerSM}, \#SMs)
+    \#SMs_{active} = \text{min}(\frac{\#TBs}{\#WarpsPerSM \times \#ThreadsPerSM}, \#SMs)
 \end{equation}
 \noindent
-The work-groups are then divided evenly among the active \acrshortpl{sm}. If there are more work-groups than the total number of threads available in \Gls{vortex}, the last \acrshort{sm} is allocated all of the remaining work-groups. This can result in very inefficient workload distribution, and the programs running on the \acrshort{gpu} have to be adjusted before compilation to best fit the architecture. Static workload distribution also have another weakness. If for some reason the \acrshortpl{sm} require different amount of time to complete their workload, the \acrshortpl{sm} which finish early, end up idling while waiting for the other \acrshortpl{sm} to complete their workloads. The difference in execution time, can stem from multiple causes. The memory system could prioritize requests from certain \acrshortpl{sm}, or the workloads could differ, for example in terms of divergence. This results in unused computational power and reduces throughput of the \acrshort{gpu}. While I do not propose or implement any solutions to this problem in this thesis, it is relevant for understanding the results and evaluation in Chapter~\ref{chap:results}.
+The \acrshortpl{tb} are then divided evenly among the active \acrshortpl{sm}. If there are more \acrshortpl{tb} than the total number slots available in \Gls{vortex}, the last \acrshort{sm} is allocated all of the remaining \acrshortpl{tb}. This can result in very inefficient workload distribution, and the programs running on the \acrshort{gpu} have to be adjusted before compilation to best fit the architecture. Static workload distribution also have another weakness. If for some reason the \acrshortpl{sm} require different amount of time to complete their workload, the \acrshortpl{sm} which finish early, end up idling while waiting for the other \acrshortpl{sm} to complete their workloads. The difference in execution time, can stem from multiple causes. The memory system could prioritize requests from certain \acrshortpl{sm}, or the workloads could differ, for example in terms of divergence. This results in unused computational power and reduces throughput of the \acrshort{gpu}. While I do not propose or implement any solutions to this problem in this thesis, it is relevant for understanding the results and evaluation in Chapter~\ref{chap:results}.
 
 \section{Scheduling Algorithms}
 

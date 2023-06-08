@@ -59,10 +59,6 @@ While porting \Gls{rodinia} benchmarks to \Gls{vortex}, I observed that the Open
 When benchmarks crashed at \textit{clCreateBuffer}, it was due to the \texttt{GL\_MEM\_ALLOC\_HOST\_PTR} flag of \textit{clCreateBuffer} being set. \texttt{GL\_MEM\_ALLOC\_HOST\_PTR} specifies that the allocated memory should be accessible by the host. To resolve this, I instead created the buffer without the flag, and instead used \texttt{clEnqueueReadBuffer} and \texttt{clEnqueueWriteBuffer} to access the memory whenever needed by the host. This issue is similar to the one above, as it seems to be caused by issues regarding permission to dynamically allocate memory in specific locations.
 
 The last issue I encountered related to OpenCL functions was \textit{clEnqueueCopyBuffer} crashing. \textit{clEnqueueCopyBuffer} copies data from one buffer on the \acrshort{gpu} to another. I is unclear why this does not work, but it could be easily resolved by reading the data from the device to the host using \texttt{clEnqueueReadBuffer}, before writing it back to the correct buffer using \texttt{clEnqueueWriteBuffer}. The workarounds I did to avoid using the problematic OpenCL features should not affect the measured performance, as measurements are made only during kernel execution.
-% \section{Allocating Memory}
-
-% \textcolor{red}{celenqueuecopybuffer}
-% During the porting of the \Gls{rodinia} benchmarks, I observed that\texttt{clEnqueueNDKernels} and \texttt{clCreateBuffer} either aborted or resulted in segmentation faults. Looking into the cause of this crash, I found that \texttt{clEnqueueNDKernels} caused a segmentation fault when the kernel contained local parameters. It seems like the driver is unable to dynamically allocate local memory for the local work groups. To solve this, we hardcoded the local buffers in the kernel scope before compiling the kernels. This introduces a new challenge of selecting the correct buffer size, corresponding to the problem size. Luckily we can just use the size given to \texttt{clSetKernelArg} when setting the local parameters. Still it requires to recompile the kernels when changing input size.
 
 The \textit{Hybridsort} and \textit{Myocyte} benchmarks from \Gls{rodinia} have kernels which required specific functions. This includes \textit{atomic\_add}, \textit{expd}, \textit{powdd} and \textit{sqrtd}. These functions, were missing from the \Gls{pocl} compiler included with \Gls{vortex}. After further inspections, it became apparent that none of the atomic functions are included. Thus these benchmarks could not be included into \Gls{vortex}' benchmark suite.
 
@@ -76,7 +72,7 @@ Table \ref{tab:new_benchmarks} shows the list of Rodinia benchmarks which can ex
         \hline
         \textbf{Applications}      & \textbf{Domains} \\ \hhline{|=|=|}
         B+ Tree                    & Graph Traversal \\ \hline
-        Back propogation           & Pattern Recognition \\ \hline
+        Back propagation           & Pattern Recognition \\ \hline
         Breadth-First Search       & Graph Algorithms  \\ \hline
         CFD Solver                 & Fluid Dynamics  \\ \hline
         Gaussian elimination       & Linear Algebra \\ \hline

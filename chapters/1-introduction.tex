@@ -1,23 +1,36 @@
 \chapter{Introduction}
 
-Accelerators are becoming more important in \acrfull{hpc} to increase computing power. Accelerators have compute units specialized for a single domain. \acrshortpl{gpu} are by far the most common type of accelerator, exploiting data level parallelism to achieve high throughput for highly parallelizable workloads. \acrshortpl{gpu} are used for graphics operations, but also for other more compute focused workloads.
-Due to the prevalence of \acrshortpl{gpu}, \acrshort{gpu} research is becoming more essential.
+\section{Motivation}
+
+Computer architects and engineers have for a long time been able to increase computer performance by the reduction of feature sizes following Moore's Law~\cite{moore}, and increasing clock frequencies. However, this with the end of Dennard scaling~\cite{dennard_scaling}, we have hit a a power wall~\cite{powerwall}, forcing designers to look at other possibilities for increasing performance. 
+
+Accelerators are specialized hardware for a specific domain or application, and they are a key component of improving computing power in \acrfull{hpc}. \Acrfullpl{gpu} are by far the most common type of accelerator~\cite{gpu_trends}, as most desktop and laptop computers have dedicated \acrshortpl{gpu}. \acrshortpl{gpu} utilize \acrshort{simt} and exploit data level parallelism to achieve high throughput for large parallel workloads. In the beginning they were mainly used for graphics applications, but later generations of \acrshortpl{gpu} consists of a set of highly parallel and programmable cores for more general purpose computation~\cite{gpu_history}. Due to the prevalence of \acrshortpl{gpu}, and the increased possibilities for general purpose computation, \acrshort{gpu} research is becoming more essential.
+
+\Gls{vortex}~\cite{vortex} is an open-source \acrshort{gpgpu} with a focus on enabling architecture research. \Gls{vortex} comes with its own simulation environment, giving cycle-accurate software simulations. The main attraction of using \Gls{vortex} in \acrshort{gpu} research is that the simulation can be FPGA-accelerated. This bridges the gap between slow software simulation and expensive prototyping. FPGA-acceleration also allow for simulating larger systems than what is realistically possible in software. Being able to simulate larger systems is important be more representative of real world \acrshortpl{gpu}.
+
+In this thesis, I continue the work done in my project thesis~\cite{Aurud_Project} and the master's thesis of M. Rekdal~\cite{Rekdal_Master}. In my project thesis, I implementing \textit{\acrlong{csv}}~(\acrshort{csv}) breaking down and classifying the cycles of \Gls{vortex}. I used \acrshort{csv} to further investigate the performance of \Gls{vortex}. I found that \Gls{vortex} was stalling mainly due to instructions waiting for memory requests to resolve, making it latency bound. This was possibly due to problems with \Gls{vortex}' schedulers and frontend. The issue scheduler were at times unable to issue ready instructions, and the frontend was struggling to fetch enough instructions, reducing \Gls{vortex}' throughput and ability to exploit parallelism. 
+
+Figure~\ref{fig:task-contribution} provides a high-level overview of the \Gls{vortex} \acrshort{gpu} and its environment. It also shows how the tasks and contributions presented in Section~\ref{sec:tasks} and \ref{sec:contributions} relate to each other and to \Gls{vortex}. I have first and foremost proposed and implemented improvements to the frontend and schedulers of \Gls{vortex}' \acrfullpl{sm}. Additionally I have broadened the existing benchmark suite to include most of the Rodinia~\cite{rodinia, rodinia_characterization} benchmarks. Lastly I have improved \acrshort{csv} to give a better overview of why \Gls{vortex} is stalling, allowing me to give a better evaluation of the improvements.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/task-contribution-4.png}
+    \caption[High-level overview of the \Gls{vortex} \acrshort{gpu}]{High-level overview of the \Gls{vortex} \acrshort{gpu}. The overview also show how the tasks and contributions relate, and where in the project the contributions are made.}
+    \label{fig:task-contribution}
+\end{figure}
+
+
+% Accelerators are a common method to increase  \acrfull{hpc} to increase computing power. Accelerators have compute units specialized for a single domain. \acrshortpl{gpu} are by far the most common type of accelerator, exploiting data level parallelism to achieve high throughput for highly parallelizable workloads. \acrshortpl{gpu} are used for graphics operations, but also for other more compute focused workloads. Due to the prevalence of \acrshortpl{gpu}, \acrshort{gpu} research is becoming more essential.
 
 % \textcolor{red}{This is a part of enabling GPU research at in CAL at NTNU.}
 
-\Gls{vortex} is an open-source \acrshort{gpgpu} with a focus on enabling architecture research. In this thesis I continue the work done in my project thesis \cite{Aurud_Project} and the master's thesis of M. Rekdal \cite{Rekdal_Master}. In my project thesis\cite{Aurud_Project}, I investigated the performance of \Gls{vortex}, in addition to implementing \acrfull{csv} breaking down the cycles. In the project I found that \Gls{vortex} is mainly stalling due to instructions waiting for memory requests to resolve, making it latency bound. This was possibly due to issues with the schedulers and frontend of \Gls{vortex}' pipeline. The issue scheduler is at times unable to issue ready instructions reducing its throughput and ability to exploit parallelism. Additionally I observed that the frontend of \Gls{vortex}' pipeline is struggling to fetch enough instructions to enable the \acrshort{gpu} to hide stalls.
+% \textcolor{red}{Describe why FPGA simulation is great and why this is a motivation for using vortex. A common method for evaluating computer architecture is software simulation. This is troublesome for larger systems as it is slow}
 
-In this thesis first I describe in detail the issues found in my project before I propose and implement solutions for them. To obtain more and better results, I also implement most of the Rodinia benchmarks to run on \Gls{vortex}.  
+% \textcolor{red}{This work is also about getting to know Vortex and its architecture. Improving the Vortex environment with benchmarks and tools (\acrshort{csv}) which can be used on FPGAs}
 
-\textcolor{red}{Describe why FPGA simulation is great and why this is a motivation for using vortex. A common method for evaluating computer architecture is software simulation. This is troublesome for larger systems as it is slow}
+\section{Assignment Interpretation} \label{sec:tasks}
 
-\textcolor{red}{While Vortex allows for FPGA simulation, it has a main issue, memory bandwidth and latency scaled to the throughput of the GPU. While work is being done at CAL to solve this, I have to continue using software simulation. }
-
-\textcolor{red}{This work is also about getting to know Vortex and its architecture. Improving the Vortex environment with benchmarks and tools (\acrshort{csv}) which can be used on FPGAs}
-
-\section{Assignment Interpretation}
-
-In this thesis I will continue the work done in my project thesis\cite{Aurud_Project}. The overarching goal of the my project- and master thesis is to aid the \acrfull{cal} at NTNU to simulate and evaluate \acrshort{gpu}s using \acrshort{fpga}s. I define the following list of tasks based on my interpretation of \hyperref[chap:assignment]{the assignment text}:
+In this thesis, I will continue the work done in my project thesis~\cite{Aurud_Project}. The overarching goal of the my project- and master thesis is to aid the \acrfull{cal} at NTNU to simulate and evaluate \acrshortpl{gpu} using \acrshortpl{fpga}. I define the following list of tasks based on my interpretation of \hyperref[chap:assignment]{the assignment text}:
 
 \begin{itemize}
     \item[\textbf{T1}] Propose and implement a set of improvements to the \Gls{vortex} \acrshort{gpu} based on results and \acrshort{cpi} stacks obtained in the project thesis.
@@ -28,9 +41,9 @@ In this thesis I will continue the work done in my project thesis\cite{Aurud_Pro
 
 Task \textbf{T2} was added during development of the improvements, as I discovered that my existing version of \acrshort{csv} was too connected to \Gls{vortex}' issue scheduler. This blocked \acrshort{csv} from giving a good overview of the issue stage and stall causes.
 
-\section{Contributions}
+\section{Contributions} \label{sec:contributions}
 
-In this thesis I make the following key contributions:
+In this thesis, I make the following key contributions:
 \begin{itemize}
     \item[\textbf{C1}] I propose and implement changes to \Gls{vortex}' fetch, decode and issue stage to increase fetch and issue bandwidth, solving the problems identified in my project thesis.
     \item[\textbf{C2}] I improve upon \acrshort{csv}, enabling it to identify the stall cause for all warps in the instruction buffer and attributing them accordingly.
@@ -38,34 +51,25 @@ In this thesis I make the following key contributions:
     \item[\textbf{C4}] I expand \Gls{vortex}' benchmark suite to include most of the \Gls{rodinia} benchmarks. I additionally improve core components of \Gls{vortex}' mechanisms to collect performance metrics, making it more accurate and allowing multi-kernel programs to be used for benchmarking.  
 \end{itemize}
 
-Figure \ref{fig:task-contribution} describes how the tasks and contributions relate and where in the project the contributions are made.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{figures/task-contribution-2.png}
-    \caption[Relating tasks and contributions to the project.]{Illustration of how the tasks and contributions relate and where in the project the contributions are made.}
-    \label{fig:task-contribution}
-\end{figure}
+The tasks and contributions are linked one-to-one, i.e. $\textbf{Tx}\leftrightarrow~\textbf{Cx}$. Figure \ref{fig:task-contribution} also describe how the tasks and contributions relate and where in the project the contributions are made.
 
 \section{Outline}
 
 Following is the outline for the rest of the thesis:
 
 \begin{itemize}
-    \item \textbf{Chapter 2} covers background information regarding GPUs, GPU simulation, stall inspection and the architecture of \Gls{vortex}.
-    \item \textbf{Chapter 3} details all of the changes/improvements I have done to the Vortex architecture.
-    \item \textbf{Chapter 4} contains details regarding how Rodinia benchmarks were altered to run on \Gls{vortex}.
-    \item \textbf{Chapter 5} describes my methodology for collecting performance metrics and generating \acrlong{csv}.
+    \item \textbf{Chapter 2} covers background information regarding GPUs, GPU programming model and GPU simulation.
+    \item \textbf{Chapter 3} first describe in detail the main components of \Gls{vortex}, and why the frontend is a bottleneck. Then it covers my proposed changes to solve the problems.
+    \item \textbf{Chapter 4} contains details regarding how I implemented a wider range of \Gls{rodinia} benchmarks to run on \Gls{vortex}.
+    \item \textbf{Chapter 5} describes my methodology for collecting performance metrics to generate \acrshort{cpi} stacks.
     \item \textbf{Chapter 6} includes information regarding the experimental setup and \Gls{vortex} configuration.
-    \item \textbf{Chapter 7} contains the results and analysis. Additionally, I present a sensitivity analysis.
-    \item \textbf{Chapter 8} contains the conclusion in addition to ideas for further work.
+    \item \textbf{Chapter 7} contains the results and analysis, in addition to a sensitivity analysis.
+    \item \textbf{Chapter 8} contains the conclusion and thoughts regarding further work.
 \end{itemize}
 
 \begin{figure}
     \centering
     \includegraphics[width=0.8\textwidth]{figures/thesis-outline.png}
-    \caption[Outline of the thesis]{Outline of chapters in the thesis. Chapter 3, 4 and 5 cover the contributions made by me.}
+    \caption[Thesis outline]{Outline of the chapters in the thesis. Chapter 3, 4, 5 and 7 contain the contributions made by me.}
     \label{fig:thesis_outline}
 \end{figure}
-
-

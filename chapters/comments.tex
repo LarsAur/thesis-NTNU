@@ -42,6 +42,39 @@
 
 %\textcolor{red}{For all warps, check if they can issue. Most of the logic is implemented in scoreboard and dispatch. Requires selector in dispatch and scoreboard for each warp to read registers regarding the ready state}
 
+% \textcolor{red}{While Vortex allows for FPGA simulation, it has a main issue, memory bandwidth and latency scaled to the throughput of the GPU. While work is being done at CAL to solve this, I have to continue using software simulation. }
 
 % TODO: Comment on the number of bits used to track gto age and handling of overflow
 % TODO: Comment on the size of the ibuffer
+
+% \section{Allocating Memory}
+
+% \textcolor{red}{celenqueuecopybuffer}
+% During the porting of the \Gls{rodinia} benchmarks, I observed that\texttt{clEnqueueNDKernels} and \texttt{clCreateBuffer} either aborted or resulted in segmentation faults. Looking into the cause of this crash, I found that \texttt{clEnqueueNDKernels} caused a segmentation fault when the kernel contained local parameters. It seems like the driver is unable to dynamically allocate local memory for the local work groups. To solve this, we hardcoded the local buffers in the kernel scope before compiling the kernels. This introduces a new challenge of selecting the correct buffer size, corresponding to the problem size. Luckily we can just use the size given to \texttt{clSetKernelArg} when setting the local parameters. Still it requires to recompile the kernels when changing input size.
+
+% To improve the insight into Vortex' performance, I expand upon my previous method for generating \textit{cycle-stacks for Vortex}(\acrshort{csv}), giving greater insight into what is causing Vortex to stall. Lastly I broaden Vortex' lacking benchmark suite by implementing benchmarks from Rodinia, a commonly used set of \acrshort{gpu} benchmarks. 
+
+% On average, the frontend improvements reduce the number of frontend stalls by $71\%$. For benchmarks such as \textit{sfilter}, over $99\%$ of the frontend stalls are removed, as all the control stalls are unnecessary and removed. 
+% The frontend changes heavily reduce the number of stalls caused by \Gls{vortex}' mechanisms to handle control flow. Together with the new schedulers it allows the issue stage to utilize its functional units to a greater degree. The changes give an average reduction in \acrshort{cpi} of --\% over the baseline, with \textit{psort}, \textit{sgemm} and \textit{Needleman-Wunsch} seeing a 20\% reduction in \acrshort{cpi}. However, some benchmarks see a slight increase or no change to their \acrshort{cpi}. This is due to a lack of memory bandwidth and \acrshort{mlp}, which can be solved by increasing the number of warps per \acrshort{sm}, and use a memory system more suitable for \acrshortpl{gpu}. I observe little to effect of using \acrshort{gto} over \acrshort{lrr}, which is likely due to weaknesses in my implementation. 
+
+%In this thesis, I implement \textit{no-stall-scheduling} and \textit{stall-prediction} allowing vortex to schedule consecutive warps without stalling the frontend, and improve its icache-stage to increase throughput of the fetch stage. Additionally I improve Vortex' schedulers to detect ready warps, removing unnecessary stalls. I also examine the impact of switching from a \textit{loose-round-robin}(\acrshort{lrr}) to a \textit{greedy-then-oldest}(\acrshort{gto}) scheduling algorithm.
+
+% \acrshort{fpga}-akselerasjon fungerer som en middelvei mellom softwaresimulering og maskinvareprototyper, ved å kombinere raske simuleringer med muligheten til å gjøre endringer raskt. Vortex er en RISC-V-basert GPGPU som kan FPGA-akselereres, og kan dermed være en god kandidat for forskning innen \acrshort{gpu} arkitekturer. Tidligere undersøkelser har funnet potensielle flaskehalser i \Gls{vortex}’ frontend og skedulerere. Dette hindret \Gls{vortex} i å utnytte \acrshort{simd} og \acrshort{mlp}, noe som reduserte gjennomstrømningen og gjorde den latensbundet.
+
+% I denne oppgaven implementerer jeg \textit{no-stall-scheduling} og \textit{stall-prediksjon} som gjør det mulig for \Gls{vortex} å skedulere påfølgende warps uten å blokkere dem i frontenden. I tillegg forbedres icache-stadiet ved å øke gjennomstrømmingen av instruksjoner fra instruksjons-cachen. Jeg forbedrer også
+% \Gls{vortex}’ skeduler, slik at den kan identifisere warps som er klare, dette fjerner unødvendige ventesykler. Jeg undersøker også virkningen av å bytte fra en \textit{loose-round-robin} (LRR) til en \textit{greedy-then-oldest} (GTO) algoritme for skedulering.
+
+% For å forbedre innsikten i Vortex’ ytelse, utvider jeg mine tidligere
+% implementasjon for å generere \textit{cycle-stacks for Vortex} (CSV), for å gi innblikk i
+% hva som får Vortex til å sakke ned. Til slutt utvider jeg Vortex' manglende benchmark-suite
+% ved å implementere benchmarks fra Rodinia, et ofte brukt sett med GPU-benchmarks.
+
+% Endringene i frontenden reduserer antallet ventesykler forårsaket av \Gls{vortex}'
+% mekanismer for å håndtere kontrollflyt. Sammen med de nye skedulererene muliggjør det for
+% issue-stadiet å utnytte de funksjonelle enhetene i større grad. Forandringene
+% gir en gjennomsnittlig reduksjon i \acrshort{cpi} på –\% over utgangspunktet, hvor \textit{psort, sgemm} og
+% \textit{Needleman-Wunsch} ser en reduksjon i \acrshort{cpi} på $20\%$. Noen benchmarks
+% opplever en liten økning eller ingen endring i \acrshort{cpi}. Dette skyldes en mangel på minne
+% båndbredde og minnenivå parallellitet, som kan løses ved å øke antall warps per
+% \acrshort{sm}, og bruk et minnesystem som er mer egnet for GPUer. Jeg observerer få forskjeller i bruk av
+% GTO over LRR, noe som sannsynligvis skyldes svakheter i implementasjonen min.
