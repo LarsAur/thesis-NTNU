@@ -21,7 +21,7 @@ To solve these problems, I had to stop the performance metrics from being reset 
 
 Problem 2 and 3 listed above, can be be resolved by moving the code responsible for writing the performance data to memory, into a separate kernel, which is executed after the benchmark has completed. Doing this makes sure that all of the \acrshortpl{sm} completes their workloads before starting the process of reading performance data. Thus ensuring that it does not interfere with the results of the benchmark, and is only done once.
 
-The final solution illustrated in Figure \ref{fig:init_run_dump} can be divided into three phases. Upon starting the execution of a benchmark, the initializing kernel \textcircled{\small{1}} is first ran. It is responsible for setting the \textit{perf-reset-lock} low, to allow the performance metrics to reset correctly. \textcircled{\small{2}} The kernels belonging to the benchmark then set the \textit{perf-reset-lock} high to keep the data from resetting. The benchmark continues to execute its kernels until it has completed.\textcircled{\small{3}} Finally, the performance dump kernel is ran, setting the \textit{perf-lock} high to stop it from altering the results, thus solving problem 1. 
+The final solution, illustrated in Figure \ref{fig:init_run_dump}, can be divided into three phases. \textcircled{\small{1}} Upon starting the execution of a benchmark, the initializing kernel is first ran. It is responsible for setting the \textit{perf-reset-lock} low, to allow the performance metrics to reset correctly. \textcircled{\small{2}} The kernels belonging to the benchmark then set the \textit{perf-reset-lock} high to keep the data from resetting. The benchmark continues to execute its kernels until it has completed. \textcircled{\small{3}} Finally, the performance dump kernel is ran, setting the \textit{perf-lock} high to stop it from altering the results, thus solving problem 1. 
 
 % \textcolor{red}{An alternative solution would be to implement a reset instruction, but the additional kernel would still be required. This solution less ideal, because the performance metrics would not be reset at the beginning of the benchmark, thus not include cycles of icache misses etc.}
 
@@ -30,7 +30,7 @@ The final solution illustrated in Figure \ref{fig:init_run_dump} can be divided 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/perf-kernels.png}
-    \caption[Illustration of the three stages of multi-kernel benchmarking.]{Illustration of the initialization, run and dump stages of benchmarking. TODO: Numbers, refer to new registers}
+    \caption[Illustration of the three stages of multi-kernel benchmarking.]{Illustration of the three stages of multi-kernel benchmarking: \textit{initialization}, \textit{execution of benchmark} and \textit{dumping of performance data}}
     \label{fig:init_run_dump}
 \end{figure}
 
@@ -52,11 +52,11 @@ To make this solution viable to implement for all benchmarks, I created a header
 
 \section{Adapting Benchmarks for Vortex}
 
-The \gls{pocl} driver included with Vortex does not support online compilation of the kernels. Thus all kernels have to be compiled offline and loaded as binaries. This meant that variables could not be passed from the program to the kernel before compilation, but rather had to be set before the offline compilation. Because of this, the benchmarks become less flexible, as some buffer sizes had to be hard-coded before compilation, instead of changing with the input of the benchmark.
+\Gls{vortex} has support for OpenCL, and uses \gls{pocl}~\cite{pocl} to implement the compiler and runtime software, which provides an OpenCL interface for the host. The compiler has been modified to support the generation of kernel binaries targeting the extended \Gls{riscv} \acrshort{isa} used by \Gls{vortex}. The \gls{pocl} driver does however not support online compilation. Thus all kernels have to be compiled offline and loaded as binaries. This meant that variables could not be passed from the program to the kernel before compilation, but rather had to be set before the offline compilation. Because of this, the benchmarks become less flexible, as some buffer sizes had to be hard-coded before compilation, instead of changing with the input of the benchmark.
 
 While porting \Gls{rodinia} benchmarks to \Gls{vortex}, I observed that the OpenCL functions \textit{clEnqueueNDKernels}, \textit{clEnqueueCopyBuffer} and \textit{clCreateBuffer} sometimes aborted or resulted in segmentation faults. Looking into the cause of the crashes, I found that \textit{clEnqueueNDKernels} caused a segmentation fault when the kernel contained local parameters. It seems like the driver is unable to dynamically allocate local memory for the work-items of the work-groups using \textit{clSetKernelArg}. To solve this, I removed the local parameters of the kernels, and instead defined local buffers in the kernel code. By doing this, the driver does not have to allocate the buffers dynamically. As the size of the local buffers is now defined at compile time of the kernels, I had to hard-code the buffer sizes according with the selected input of the benchmarks.
 
-When benchmarks crashed at \textit{clCreateBuffer}, it was due to the \texttt{GL\_MEM\_ALLOC\_HOST\_PTR} flag of \textit{clCreateBuffer} being set. \texttt{GL\_MEM\_ALLOC\_HOST\_PTR} specifies that the allocated memory should be accessible by the host. To resolve this, I instead created the buffer without the flag, and instead used \texttt{clEnqueueReadBuffer} and \texttt{clEnqueueWriteBuffer} to access the memory whenever needed by the host. This issue is similar to the one above, as it seems to be caused by issues regarding permission to dynamically allocate memory in specific locations.
+The \textit{clCreateBuffer} function creates a buffer on the \acrshort{gpu} to store data. If the \texttt{GL\_MEM\_ALLOC\_HOST\_PTR} flag of \textit{clCreateBuffer} is set, the allocated memory should be accessible by the host. For \Gls{vortex} it seems like using this flag results in a segmentation fault. To resolve this, I instead created the buffer without the flag, and used \texttt{clEnqueueReadBuffer} and \texttt{clEnqueueWriteBuffer} to access the memory whenever needed by the host. This issue is similar to the one above, as it seems to be caused by issues regarding the permission to dynamically allocate memory in specific locations.
 
 The last issue I encountered related to OpenCL functions was \textit{clEnqueueCopyBuffer} crashing. \textit{clEnqueueCopyBuffer} copies data from one buffer on the \acrshort{gpu} to another. I is unclear why this does not work, but it could be easily resolved by reading the data from the device to the host using \texttt{clEnqueueReadBuffer}, before writing it back to the correct buffer using \texttt{clEnqueueWriteBuffer}. The workarounds I did to avoid using the problematic OpenCL features should not affect the measured performance, as measurements are made only during kernel execution.
 
@@ -91,12 +91,14 @@ Table \ref{tab:new_benchmarks} shows the list of Rodinia benchmarks which can ex
     \label{tab:new_benchmarks}
 \end{table}
 
-\section{Fast-Forward, Warm-Up and Early-Exit}
+When simulating \Gls{vortex} in software, Verilator~\cite{verilator} is used to compile the SystemVerilog implementation of \Gls{vortex} into a vortex library. This library can simulate the the entire \acrshort{gpu} cycle-accurately. When executing a benchmark, it is linked with the \Gls{vortex} driver and \Gls{vortex} library generated by Verilator. This allows the host to treat the simulated \acrshort{gpu} as if it was a normal \acrshort{gpu} using an OpenCL interface. The software and \acrshort{fpga} simulations thus provide the same interface. The changes to the benchmarks in this sections should therefore also work for the \acrshort{fpga} 
+
+\section{Fast-Forward, Warm-Up and Early-Exit} \label{sec:ff_wu_ee}
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/fast-forward-timeline.png}
-    \caption{Timeline explaining \textit{fast-forward, warm-up} and \textit{early-exit}. TODO: Use lock registers}
+    \caption{Timeline explaining \textit{fast-forward, warm-up} and \textit{early-exit}.}
     \label{fig:ff-timeline}
 \end{figure}
 
@@ -104,7 +106,7 @@ Most of the Rodinia benchmarks I added to \Gls{vortex}, require substantially mo
 
 There is no emulator or less accurate simulator for \Gls{vortex}, thus \textit{fast-forwarding} and \textit{warm-up} will have limited versatility. To further reduce simulation time, I introduce \textit{early-exit} to \Gls{vortex}. \textit{Early-exit} terminates the benchmark after a given number of cycles. As the number of simulated cycles scales linearly with the simulation time, using \textit{early-exit} allows for easily regulating the simulation time. When implementing \textit{early-exit}, it becomes more important to skip the startup, i.e \textit{fast-forward} and \textit{warm-up}, as it becomes a larger portion of the execution time. 
 
-\textit{Fast-forward} and \textit{warm-up} is implemented by setting the \textit{perf-lock} register, described in Section \ref{sec:reading_perf}, high for a given number of cycles at the beginning of the simulation. Thus no performance data will be collected during the startup. Caches and other components can also be warmed during this period. Note that this is only performed for the first kernel in a benchmark. If a benchmark executes multiple kernels before exiting, the startup cycles become representative of the kernels performance. \textit{Early-exit} is implemented by deactivating all the \acrshortpl{sm} after a number of cycles. This indicates for the driver that \Gls{vortex} has completed its execution. 
+\textit{Fast-forward} and \textit{warm-up} is implemented by setting the \textit{perf-lock} register, described in Section \ref{sec:reading_perf}, high for a given number of cycles at the beginning of the simulation. Thus no performance data will be collected during the startup. Caches and other components can also be warmed during this period. Note that this is only performed for the first kernel in a benchmark. If a benchmark executes multiple kernels before exiting, the startup cycles become representative of the kernels performance. \textit{Early-exit} is implemented by deactivating all the \acrshortpl{sm} after a given number of cycles. This indicates for the driver that \Gls{vortex} has completed its execution. 
 
 This method of implementing \textit{early-exit} is somewhat problematic. When terminating early, the result of the kernels will not be correct. Some of the benchmarks are affected by the results returned by the kernel execution. \textit{Streamcluster} does for example execute the kernel until the result is not getting better. If the result is wrong due to \textit{early-exit}, it might result in an infinite loop of starting and exiting the kernel. To resolve this, I had to manually add safe-guards for \textit{streamcluster} and \textit{kmeans}, setting a maximum number of iterations.
 

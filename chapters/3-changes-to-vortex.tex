@@ -6,7 +6,7 @@ In this chapter I will first give an overview of the \Gls{vortex} architecture a
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{figures/vortex-pipeline2-no-background.png}
+    \includegraphics[width=\textwidth]{figures/vortex-pipeline3.png}
     \caption{\Gls{vortex} \Gls{riscv} 5-stage pipeline of a \acrfull{sm}}
     \label{fig:vortex_microarchitecture}
 \end{figure}
@@ -18,9 +18,7 @@ In this chapter I will first give an overview of the \Gls{vortex} architecture a
     \label{fig:clustering}
 \end{figure}
 
-The \Gls{vortex} microarchitecture is illustrated in Figure \ref{fig:vortex_microarchitecture}. Each \acrshort{sm} is a 5-stage pipeline containing a \textit{fetch}, \textit{decode}, \textit{issue}, \textit{execute} and \textit{commit} stage. The \acrshortpl{sm} of \Gls{vortex} all have their own L1 and instruction caches. There are also options for \Gls{vortex} to include L2 and L3 caches, which are shared among \acrshortpl{sm}, as shown in Figure \ref{fig:clustering}. If the L2 or L3 caches are not included, they are replaced by memory arbiters. \Gls{vortex}' pipeline is elastic~\cite{elastic_pipeline}, i.e. it is using \textit{ready} and \textit{valid} signals to communicate between the modules and pipeline stages. This makes it easier to add new or configure existing components, as the modules can be more flexible in the number of cycles they use.
-
-\textcolor{red}{The Vortex gpu is mostly undocumented, except what is explained in their paper, thus most of this insight is through reading rtl source code.}
+Other than what is written in the \Gls{vortex} paper~\cite{Aurud_Project}, \Gls{vortex} is mostly undocumented. Most of my understanding of \Gls{vortex}' architecture and software stack is thus derived from reading the source code. The \Gls{vortex} microarchitecture is illustrated in Figure~\ref{fig:vortex_microarchitecture}. Each \acrshort{sm} is a 5-stage pipeline containing a \textit{fetch}, \textit{decode}, \textit{issue}, \textit{execute} and \textit{commit} stage. The \acrshortpl{sm} of \Gls{vortex} all have their own L1 and instruction caches. There are also options for \Gls{vortex} to include L2 and L3 caches, which are shared among \acrshortpl{sm}, as shown in Figure~\ref{fig:clustering}. If the L2 or L3 caches are not included, they are replaced by memory arbiters. \Gls{vortex}' pipeline is elastic~\cite{elastic_pipeline}, i.e. it is using \textit{ready} and \textit{valid} signals to communicate between the modules and pipeline stages. This makes it easier to add new or configure existing components, as the modules can be more flexible in the number of cycles they use.
 
 \subsection{Vortex ISA}
 
@@ -91,13 +89,13 @@ The baseline issue scheduler in \Gls{vortex}, described in Section \ref{sec:vort
     \label{fig:unready_lrr}
 \end{figure}
 
-Figure \ref{fig:new_issue_stage} illustrates the new issue stage implemented by me. It performs the ready check for all warps before the instruction scheduler selects the warp to issue. Each warp checks if it is ready by: \textcircled{\small{1}} Check in dispatch if the corresponding \acrshort{fu} is available. \textcircled{\small{2}} Check in scoreboard if the required operands are available. \textcircled{\small{3}} Use bitwise AND to create a bitmask of ready warps. \textcircled{\small{4}} Lastly, create a bitmask of valid warps which can be issued, by finding the bitwise AND of the ready warps and the warps available in the ibuffer. These changes result in a ready \acrfull{lrr} scheduler as described in Section~\ref{sec:warp_scheduling}.
+Figure \ref{fig:new_issue_stage} illustrates the new issue stage implemented by me. It performs the ready check for all warps before the instruction scheduler selects the warp to issue. Each warp checks if it is ready by: \textcircled{\small{1}} Check in dispatch if the corresponding \acrshortpl{fu} is available. \textcircled{\small{2}} Check in scoreboard if the required operands are available. \textcircled{\small{3}} Use bitwise AND to create a bitmask of ready warps. \textcircled{\small{4}} Create a bitmask of valid warps which can be issued, by finding the bitwise AND of the ready warps and the warps available in the ibuffer. The instruction scheduler can then select a ready warp from this bitmask. \textcircled{\small{5}} The selected warp ID is sent back to the ibuffers, dispatch, scoreboard to update their values. These changes result in a ready \acrfull{lrr} scheduler as described in Section~\ref{sec:warp_scheduling}.
 
 The implementation of the new issue stage does not require much additional hardware. All the information is already available in scoreboard and dispatch, thus it mainly requires selectors for reading the correct registers. The scheduler does not need to be changed, as it continues to selects a warp from the bitmask. 
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{figures/new_issue_stage.pdf}
+    \includegraphics[width=\textwidth]{figures/New Issue Stage.png}
     \caption[Illustration of the new issue stage.]{Illustration of the new issue stage allowing the instruction scheduler to check for ready warps before selecting which warp to issue.}
     \label{fig:new_issue_stage}
 \end{figure}
@@ -129,18 +127,20 @@ After implementing ready scheduling, the possibility of implementing other sched
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.7\textwidth]{figures/find-first-scheduling.png}
-    \caption[Demonstration of \Gls{vortex}' find-first warp scheduler.]{Demonstration of how \Gls{vortex}' find-first warp scheduler schedules warps to fetch. When the stall latency is shorter than $\text{\#Warps} - 1$ cycles, some warps are scheduled substantially less than the others.}
+    \includegraphics[width=0.7\textwidth]{figures/find-first-scheduling-2.png}
+    \caption[Demonstration of \Gls{vortex}' find-first warp scheduler.]{Demonstration of\Gls{vortex}' \textit{find-first} warp scheduling algorithm. When the length of the stalls are shorter than $\text{\#Warps} - 1$ cycles, the low priority warps are scheduled substantially less than the high priority warps.}
     \label{fig:find_first_scheduling}
 \end{figure}
 
-As explained in Section \ref{sec:vortex_pipeline}, \Gls{vortex} two schedulers, the \textit{warp scheduler} in the fetch stage, and the \textit{issue scheduler} in the issue stage. The interaction between the two schedulers might be important for the issue scheduler to achieve its goals. For example, if the warp scheduler fetches warps in \acrshort{lrr} order, a \acrshort{gto} issue scheduler will not have enough warps from the same \acrshort{tb} to see the effects of greedy scheduling. It is thus desirable to use scheduling algorithms for the warp scheduler which supports the goals of the issue scheduler. To achieve this I implemented the same \acrshort{lrr} and \acrshort{gto} algorithms in the warp scheduler.
+As explained in Section \ref{sec:vortex_pipeline}, \Gls{vortex} has a \textit{warp scheduler} in the fetch stage. The algorithm currently used by this scheduler is \textit{find-first}, which prioritizes warps based on warp ID. Figure~\ref{fig:find_first_scheduling} illustrates how this algorithm can end up scheduling low-priority warps substantially less than high-priority warps. This can make some warps finishing long before others, resulting in idle cycles. This does not happen for the baseline version of \Gls{vortex}, as there are too many frontend stalls. However as I am going to improve the frontend, it is likely better to use a more traditional algorithm.
+
+The interaction between the issue scheduler and the warp scheduler is likely to be important for the algorithms to achieve their goals. For example, if the warp scheduler fetches warps in \acrshort{lrr} order, a \acrshort{gto} issue scheduler will not have enough warps from the same \acrshort{tb} to see the effects of greedy scheduling. It is thus desirable to use scheduling algorithms for the warp scheduler which supports the goals of the issue scheduler. To achieve this I implement the same \acrshort{lrr} and \acrshort{gto} algorithms in the warp scheduler.
 
 Implementing the algorithms in the warp scheduler is quite simple as the scheduler modules can be reused. Instead of using the bitmask of warps which are ready to issue as input, the bitmask of ready warps in fetch can be used for the warp scheduler. An issue which arise when implementing \acrshort{gto} in the warp scheduler is that \acrshort{gto} wants to fetch warps from the same \acrshort{tb} multiple cycles in a row. As explained in Section~\ref{sec:vortex_pipeline}, the warps are stalled after being scheduled to avoid potential control flow hazards. Thus a \acrshort{gto} warp scheduler will not have the intended behaviour when integrated into the existing pipeline. Section~\ref{sec:no_stall_scheduling} describes changes to the frontend which solve this issue.
 
 \section{Frontend}
 
-In my project thesis\cite{Aurud_Project}, I found that \Gls{vortex}' frontend was unable to fetch enough instructions to the issue stage, impeding its ability to hide stalls. This section describes a set of changes done to improve the throughput of the frontend.
+In my project thesis~\cite{Aurud_Project}, I found that \Gls{vortex}' frontend was unable to fetch enough instructions to the issue stage, impeding its ability to hide stalls. This section describes a set of changes done to improve the throughput of the frontend.
 
 \subsection{No Stall Scheduling} \label{sec:no_stall_scheduling}
 
@@ -148,7 +148,7 @@ The root of the frontend problem is that \acrshortpl{tb} are stalled whenever th
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{figures/new-icache-stage.png}
+    \makebox[\textwidth][c]{\includegraphics[width=\textwidth]{figures/new-icache-stage.png}}
     \caption[Illustration of the improved icache-stage.]{Improved icache-stage allowing for multiple concurrent instruction fetch requests from each \acrshort{tb}}
     \label{fig:new_icache_stage}
 \end{figure}
@@ -181,7 +181,7 @@ The index bits can be any subset of the \acrshort{pc} bits, but I elected to use
 \begin{figure}
     \centering
     \includegraphics[width=0.9\textwidth]{figures/stall_table.png}
-    \caption[Illustration of the stall table.]{\textit{Stall-table} used to check if an instruction is known to block the next instruction from being fetched or cause a flush.}
+    \caption[Illustration of the stall table.]{Illustration of the stall-table, which is used to check if an instruction is known to require stalling}
     \label{fig:stall_table}
 \end{figure}
 

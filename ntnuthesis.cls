@@ -145,7 +145,7 @@
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 \usepackage{amsmath}
-\RequirePackage{makecell} % for multiline table cells
+\RequirePackage{makecell}                   % for multiline table cells
 \RequirePackage[utf8]{inputenc}             % for special characters in input
 \RequirePackage[T1]{fontenc}                % modern font encoding
 \RequirePackage[charter, cal=cmcal]{mathdesign} % main font with math support
