@@ -38,7 +38,7 @@ An issue with sampling \textit{idle} stalls is that the \acrshortpl{sm} terminat
 \end{equation}
 \noindent
 where $\textrm{max}(C_{active})$ represents the number of cycles used to run the program, and $C^i_{active}$ represents the number of active cycles for the $i$th \acrshort{sm}.
-
+\newpage
 While the \textit{data} and \textit{structural} stalls described by \acrshort{gsi} can occur individually, an instruction can also be stalled by both at the same time. This is why I included a \textit{data \& structural} stall class. If a warp is waiting for both data and the functional unit to be ready, it would thus be attributed to a separate class rather than having to prioritize one class over another.
 
 \section{Improving CSV} \label{sec:improve_csv}

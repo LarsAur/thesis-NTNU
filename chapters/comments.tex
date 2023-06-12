@@ -169,3 +169,11 @@
 % For \textit{NW}, the \acrshort{cpi} is drastically increased for \textit{FGTO} and \textit{FRRR}. As the L1 cache hit rate for \textit{NW} is low, removing the L2 cache will cause a large number of requests to be sent to the main memory. Because of this, there might be a substantial amount of queuing in the memory system, especially when using \textit{FGTO} and \textit{FRRR}. While the latency of reading main memory is high, the increased throughput is thus increasing it even further. This   .in the memory system, which further increases it. As memory latency is already the bottleneck for \textit{NW}, increasing frontend throughput and issue bandwidth hurts performance when using only L1 caches.
 
 % By only incrementing the age upon a schedule, the age registers does not require many bits to track the age of the warps. In my case, I found that  than if the age was incremented every cycle.
+
+% Accelerators are a common method to increase  \acrfull{hpc} to increase computing power. Accelerators have compute units specialized for a single domain. \acrshortpl{gpu} are by far the most common type of accelerator, exploiting data level parallelism to achieve high throughput for highly parallelizable workloads. \acrshortpl{gpu} are used for graphics operations, but also for other more compute focused workloads. Due to the prevalence of \acrshortpl{gpu}, \acrshort{gpu} research is becoming more essential.
+
+% \textcolor{red}{This is a part of enabling GPU research at in CAL at NTNU.}
+
+% \textcolor{red}{Describe why FPGA simulation is great and why this is a motivation for using vortex. A common method for evaluating computer architecture is software simulation. This is troublesome for larger systems as it is slow}
+
+% \textcolor{red}{This work is also about getting to know Vortex and its architecture. Improving the Vortex environment with benchmarks and tools (\acrshort{csv}) which can be used on FPGAs}
