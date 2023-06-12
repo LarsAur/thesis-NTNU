@@ -94,3 +94,78 @@
 % Initially the L1 and L2 cache hit-rates were collected for a subset of the benchmarks. These are plotted in \ref{fig:l1_cache_hitrate} and \ref{fig:l2_cache_hitrate} for L1 and L2 cache respectively. After 30000 cycles, the cache hit-rate is stabilizing for both the L1 and L2 cache. While the L1 hit-rate for backprop is fluctuating, this is probably due to its access pattern, as similar fluctuations show up. To give some extra margins, 50000 was selected as the number of cycles to fast-forward.
 
 % For benchmarks with multiple kernels, the start-up time of each kernel become a relevant if the benchmark is not exited by early part of the performance...
+
+% \textcolor{red}{Some of the benchmarks did not run on idun, probably due to compiler differences}
+
+% The existing benchmarks included with \Gls{vortex} are quite simple. They all consist of one kernel which is ran once, while most of the \Gls{rodinia} benchmarks contain multiple kernels. In the current version of Vortex a reset signal is sent to the \acrshort{gpu} before executing a kernel. This resets the GPU, including the registers holding the performance metrics to a known initial state. Thus if a benchmark executes multiple kernels, only the performance metrics of the last kernel persists. 
+
+% As the kernels can have different characteristics, it is ideal to collect performance data for the entire benchmark. To make this possible, we have to stop the performance data from resetting. To achieve this we implemented a \acrfull{plr} which, when high, prevents the performance registers from resetting. This register is a \acrfull{csr} which can be written to using CSR-instructions, and is not affected by reset.
+
+% To initialize the performance metrics, we have to queue a program which clears the \acrshort{plr}. By doing this, the performance metrics can reset before executing the next kernel. All consecutive kernels can set this register high to prevent the parameters from resetting. This allows for collecting performance metrics for the entire benchmark for multi-kernel benchmarks.
+
+% \texttt{Dumping performance metrics at the end of the kernel}
+
+% \textcolor{red}{Benchmarks are too long to run in software simulation, introduce early exit and warp-up. How was this implemented in vortex}
+
+% \textcolor{red}{When implementing early exit, a problem arose, some benchmarks had exit conditions based on the result of their kernel. When using early exit, the result data my be garbage and result in infinite loops. To resolve this each benchmark had to be inspected to find loops and branches with conditions based on the kernel results and add safeguards, such as max number of iterations}
+
+% \section{Cactus}
+
+% \textcolor{red}{This could possibly be related work:}
+
+% \textcolor{red}{Cactus vs Rodina, problematic to implement too many kernels. Rodinia is nice, because it usually between 1 and 3 kernels, easier to capture the behaviour when using software simulation, as the benchmarks cannot run long enough to capture behaviour from all kernels}
+
+% For all benchmarks, most of the stalls in the baseline related to the issue stage are data stalls, i.e. \textit{memory data} and \textit{compute data} stalls. As there are few structural stalls it indicates that the throughput of the functional units are not fully utilized, I.e. \Gls{vortex} is latency bound. If there were more warps or other independent instructions available, they could be issued. With the increased throughput of the frontend, more warps are become available in the instruction buffer. For \textit{hotspot, 3D, lavaMD, backprop, saxpy, vecadd} and \textit{gaussian}, \textit{memory structural} stalls are exposed. This shows that the improvements are able to utilize the throughput of the \acrshortpl{lsu}. The reason why no \textit{compute structural} stalls are exposed is that most compute units have a throughput of one warp per cycle. 
+
+% \textcolor{red}{If one of the ibuffers is full, it may cause backpressure into decode and fetch. Even if the icache stage has ready instructions, they cannot be decoded and issued. This may result in a state where only one warp is available in the ibuffer, while decode and the icache stage is stalling because it is waiting for the correct ibuffer slot to be available. If this warp is stalled due to a long latency stall, no other warps can be issued to hide the stall}
+
+% \textcolor{red}{Figure \ref{fig:backpressure} shows the number of cycles per instruction where a warp is blocked in decode because of full ibuffers. ** Describe Notable elements of the graph **}
+
+% \textcolor{red}{To resolve this issue, a signal is sent from the ibuffer to the warp scheduler and (icache stage for selector) indicating for each ibuffer if it is full or not}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/backpressure/L2.png}
+%     \caption{Backpressure, placeholder}
+%     \label{fig:backpressure}
+% \end{figure}
+
+% \textcolor{red}{An alternative solution would be to implement a reset instruction, but the additional kernel would still be required. This solution less ideal, because the performance metrics would not be reset at the beginning of the benchmark, thus not include cycles of icache misses etc.}
+
+% My solution to these issues is to create two additional kernels for collecting performance metrics, \textit{performance initializer} and \textit{performance dump}. First, the \textit{performance initializer} kernel sets the \texttt{perf-reset-lock} and \texttt{perf-lock} low, such that it resets upon starting the first kernel from the benchmark. Each kernel in the benchmark then set \texttt{reset-lock} high. This solves problem 4. At the end of the benchmark, the \textit{performance dump} kernel sets the \texttt{perf-lock} high before writing the data to memory, locking the performance data solves the first issue. Having a separate kernel for reading performance data, allows us to wait until the benchmark is completed before reading the data, thus solving problem 2 and 3.
+
+% \textcolor{red}{Init kernel: ensure that the performance metrics are reset at the beginning of the benchmark. This is required as the reset lock register cannot be controlled by anything other than instructions}
+% \textcolor{red}{Include in start.S that all kernels start by setting the reset lock, this is only required for the first kernel in the benchmark, but as it is implemented in start.S which is linked to all kernels, every kernel performs the action}
+% \textcolor{red}{Dump kernel: ensure that the performance metrics are reset at the beginning of the benchmark}
+
+% \Gls{vortex} allows for selecting between a set of different simulation environments, which are displayed in Figure~\ref{fig:simstack}. The available environments are the OPAE driver, VLSIM, RTLSIM and SIMX. The OPAE driver makes use of Intel's propretary AFU simulation environment (ASE). Both VLSIM and RTLSIM utilize Verilator to simulate the RTL design and use Ramulator~\cite{Ramulator}, an extensible DRAM simulator providing cycle-accurate performance models, to simulate memory in software. VLSIM additionally simulates the AFU in software. The SIMX driver implements a cycle-level simulator for \Gls{vortex}. All of these drivers share a common API when executing programs. 
+
+% In the following sections I will present the results of the changes described in Chapter \ref{chap:changes}. The following list of configurations were tested.
+
+% \begin{itemize}
+%     \item \textbf{Vortex} is the baseline version of \Gls{vortex} as presented at MICRO'21 \cite{vortex}.
+%     \item \textbf{RI} implements the new issue stage using ready-round-robin scheduling.
+%     \item \textbf{GTO} Use GTO in warp scheduler and instruction scheduler. Both BPR and no-stall-scheduling (NSS) is enabled.
+%     \item \textbf{RR} Use round-robin and ready-round-robin in the warp scheduler and instruction scheduler respectively. Both BPR and no-stall-scheduling (NSS) is enabled.    
+% \end{itemize}
+
+% \textcolor{red}{For most of the benchmarks, memory instructions become the largest source of stalls. Note that for all benchmarks except lavaMD, \textit{memory data stalls} are more prevalent than \textit{memory structural stalls}. The \acrshort{lsu} is thus capable of handling more loads. This may indicate that the GPU is latency bound and not bandwidth bound. Increasing the number of warps in each core may introduce more \acrfull{mlp} and thus hide the latency stalls.}
+
+% \textcolor{red}{Doubling the number of warps in each core will alter the number of work items per wave and can thus result in a different number of instructions required to complete the execution of the program. Additionally, the . To ensure that the results are comparable with the results using 4 warps there is no artificial increase in IPC due to sche}
+
+% Some benchmarks see great performance improvements, while others reveal that \Gls{vortex} struggles to hide latencies. I also find that the current configuration is too small to gain performance from \acrshort{gto} over \acrshort{lrr} scheduling. This constitutes contribution \textbf{C3} corresponding with task \textbf{T3}.
+
+% - Figure shows 
+% - Baseline has a larger proportion of frontend stalls, as it is unable to schedule instructions to fill the increased width of the instruction buffer
+% - The new frontend is able to throughput enough instructions
+% - Increase in memory structural stalls and reduction in memory data stalls, this indicates that we are hitting the limit of the memory bandwidth.
+% - More idle cycles due to more skew in bandwidth distribution because of more memory contention 
+
+% -sgemm, psort and dwt see a great improvements
+%  - psort bound by short latency compute data stalls,
+%  - sgemm bound by memory latency, but its latency is lower than others
+%  - dwt2d hard to say, something might be wrong 
+
+% For \textit{NW}, the \acrshort{cpi} is drastically increased for \textit{FGTO} and \textit{FRRR}. As the L1 cache hit rate for \textit{NW} is low, removing the L2 cache will cause a large number of requests to be sent to the main memory. Because of this, there might be a substantial amount of queuing in the memory system, especially when using \textit{FGTO} and \textit{FRRR}. While the latency of reading main memory is high, the increased throughput is thus increasing it even further. This   .in the memory system, which further increases it. As memory latency is already the bottleneck for \textit{NW}, increasing frontend throughput and issue bandwidth hurts performance when using only L1 caches.
+
+% By only incrementing the age upon a schedule, the age registers does not require many bits to track the age of the warps. In my case, I found that  than if the age was incremented every cycle.
